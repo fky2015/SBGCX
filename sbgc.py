@@ -54,12 +54,19 @@ class SBGC:
         # 登录教务处选课, get一些奇奇怪怪的cookie
         if self.jxid is None:
             # 这里的判断好像有点多余，本意是想只get一次jxid，算了先不改了
+
             response = self.session.get(
                 f'{self.jwms_url}/jsxsd/xsxk/xklc_list')
-            self.jxid = regex.search(r'[^?]+(?=">进入选课)', response.text)[0]
 
+            # print(response.text)
+
+            #self.jxid = regex.search(r'[^?]+(?=">进入选课)', response.text)[0]
+
+            '5AD7F2B38FF94371BD3F8C5EC665C415'
+        # response = self.session.get(
+        #    f'{self.jwms_url}/jsxsd/xsxk/xsxk_index?{self.jxid}')
         response = self.session.get(
-            f'{self.jwms_url}/jsxsd/xsxk/xsxk_index?{self.jxid}')
+            f'{self.jwms_url}/jsxsd/xsxk/xsxk_index?jx0502zbid=5AD7F2B38FF94371BD3F8C5EC665C415')
 
         # 判断是否正确登录
         """
@@ -70,16 +77,17 @@ class SBGC:
             #print("登录失败，请检查相关配置！")
         """
 
-    def get_courses(self, ctype: str, sfct_type: bool =True)->Dict:
+    def get_courses(self, ctype: str, cctype: bool =True, kcgs: int =None)->Dict:
         "获取课程列表"
 
         # g->公选课|t->体育课|x->拓展英语
         types = {'g': 'xsxkGgxxkxk', 't': 'xsxkTykxk', 'x': 'xsxkXlxk'}
-        sfct_types = {True: 'true', False: 'false'}
+        #sfct_types = {True: 'true', False: 'false'}
+        kcxz_types = {0: '06', 1: '02'}
 
         # kcxz:课程性质 kcgs:课程归属 szjylb:种类 kcxx:课程 skls:上课老师
         # xkxq:选课星期 xkjc:选课节次 sfct:是否(过滤)冲突 sfym:根本没这选项...
-        param = {'kcxz': '06', 'sfct': sfct_types[sfct_type], 'sfym': 'false',
+        param = {'kcxz': kcxz_types[cctype], 'sfct': 'true', 'sfym': 'true',
                  'kcxx': '', 'skls': '', 'skxq': '', 'skjc': '',
                  'kcgs': '', 'szjylb': ''}
         data = {'iDisplayStart': 0, 'iDisplayLength': 1000}  # 一次加载所有的课程列表
