@@ -89,7 +89,7 @@ class SBGC:
         # xkxq:选课星期 xkjc:选课节次 sfct:是否(过滤)冲突 sfym:根本没这选项...
         param = {'kcxz': kcxz_types[cctype], 'sfct': 'true', 'sfym': 'true',
                  'kcxx': '', 'skls': '', 'skxq': '', 'skjc': '',
-                 'kcgs': '', 'szjylb': ''}
+                 'kcgs': kcgs, 'szjylb': ''}
         data = {'iDisplayStart': 0, 'iDisplayLength': 1000}  # 一次加载所有的课程列表
 
         res = self.session.post(f'{self.jwms_url}/jsxsd/xsxkkc/{types[ctype]}',
@@ -137,7 +137,7 @@ class SBGC:
 
 
 if __name__ == "__main__":
-    user = SBGC(1120171224, "BiT9182736450")
+    user = SBGC(1120171224, "××××××")
     # user.get_courses('x')
     cid = 201720182001368
     print(user.choose_a_course(cid))
