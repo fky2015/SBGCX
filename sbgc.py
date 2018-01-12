@@ -70,7 +70,7 @@ class SBGC:
             #print("登录失败，请检查相关配置！")
         """
 
-    def get_courses(self, ctype: str, sfct_type: bool)->Dict:
+    def get_courses(self, ctype: str, sfct_type: bool =True)->Dict:
         "获取课程列表"
 
         # g->公选课|t->体育课|x->拓展英语
