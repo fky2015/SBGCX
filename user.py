@@ -5,7 +5,7 @@ import sbgc as sb
 
 
 uname = "1120171224"
-upass = "BiT9182736450"
+upass = "Bsfdsdf0"
 
 # 把想抢的课的id放进去
 the_list = set({201720182002231,201720182002251,
