@@ -1,6 +1,5 @@
 "弱智抢课模块"
 from typing import Dict
-import functools
 import regex
 import requests
 from requests import Response
@@ -16,28 +15,6 @@ def print_response_info(res: requests.models.Response)->None:
     return
 
 
-# 参考 http://python.jobbole.com/81423/
-def typecheck(f):
-    def do_typecheck(name, arg):
-        expected_type = f.__annotations__.get(name, None)
-        if expected_type and not isinstance(arg, expected_type):
-            raise TypeError("{} should be of type {} instead of {}".format(
-                name, expected_type.__name__, type(arg).__name__))
-
-    @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        for i, arg in enumerate(args[:f.__code__.co_nlocals]):
-            do_typecheck(f.__code__.co_varnames[i], arg)
-        for name, arg in kwargs.items():
-            do_typecheck(name, arg)
-
-        result = f(*args, **kwargs)
-
-        do_typecheck('return', result)
-        return result
-    return wrapper
-
-
 class SBGC:
     "弱智抢课类"
     jwms_url = 'http://jwms.bit.edu.cn'
@@ -46,10 +23,12 @@ class SBGC:
     jxid = None
     #session = None
 
-    @typecheck
     def __init__(self, username: str, pwd: str):
         "初始化，登录CAS系统"
 
+        # 增加鲁棒性
+        username = str(username)
+        pwd = str(pwd)
         # print("正在登录")
 
         self.session = requests.Session()
@@ -91,16 +70,16 @@ class SBGC:
             #print("登录失败，请检查相关配置！")
         """
 
-    @typecheck
-    def get_courses(self, ctype: str)->Dict:
+    def get_courses(self, ctype: str, sfct_type: bool)->Dict:
         "获取课程列表"
 
         # g->公选课|t->体育课|x->拓展英语
         types = {'g': 'xsxkGgxxkxk', 't': 'xsxkTykxk', 'x': 'xsxkXlxk'}
+        sfct_types = {True: 'true', False: 'false'}
 
         # kcxz:课程性质 kcgs:课程归属 szjylb:种类 kcxx:课程 skls:上课老师
         # xkxq:选课星期 xkjc:选课节次 sfct:是否(过滤)冲突 sfym:根本没这选项...
-        param = {'kcxz': '06', 'sfct': 'true', 'sfym': 'false',
+        param = {'kcxz': '06', 'sfct': sfct_types[sfct_type], 'sfym': 'false',
                  'kcxx': '', 'skls': '', 'skxq': '', 'skjc': '',
                  'kcgs': '', 'szjylb': ''}
         data = {'iDisplayStart': 0, 'iDisplayLength': 1000}  # 一次加载所有的课程列表
@@ -110,10 +89,9 @@ class SBGC:
 
         return res.json()['aaData']
 
-    @typecheck
-    def choose_a_course(self, course_id: str)->Dict:
+    def choose_a_course(self, course_id: str)->None:
         "选择课程"
-        params = {'xkzy': '', 'trjf': '', 'jx0404id': course_id}
+        params = {'xkzy': '', 'trjf': '', 'jx0404id': str(course_id)}
         result = self.session.get(self.jwms_choose_course_url, params=params)
 
         #print("result:", result.text)
@@ -131,10 +109,9 @@ class SBGC:
             #return 0
         """
 
-    @typecheck
-    def quit_a_course(self, course_id: str)->Dict:
+    def quit_a_course(self, course_id: str)->None:
         "退选课程"
-        params = {'jx0404id': course_id}
+        params = {'jx0404id': str(course_id)}
         result = self.session.get(self.jwms_quit_course_url, params=params)
 
         return result.json()
@@ -152,7 +129,7 @@ class SBGC:
 
 
 if __name__ == "__main__":
-    user = SBGC('112017××××', "××××××××××")
+    user = SBGC(1120171224, "BiT9182736450")
     # user.get_courses('x')
     cid = 201720182001368
     print(user.choose_a_course(cid))
